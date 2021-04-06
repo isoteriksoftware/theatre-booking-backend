@@ -32,10 +32,10 @@ class User extends BaseController
 		if (\count($credentials) < 2)
 			return FALSE;
 
-		$email = $credentials[0];
+		$username = $credentials[0];
 		$password = $credentials[1];
 
-		$data = $this->model->getUserData($email);
+		$data = $this->model->getUserData($username);
 
 		if (! $data)
 			return FALSE;

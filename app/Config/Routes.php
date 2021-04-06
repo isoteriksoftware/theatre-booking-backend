@@ -21,6 +21,7 @@ $routes->setAutoRoute(true);
 
 $routes->get('/', 'Home::index');
 $routes->post('user', 'User::createUser');
+$routes->post('user/session', 'User::createSession');
 
 if (file_exists(APPPATH . 'Config/' . ENVIRONMENT . '/Routes.php'))
 {

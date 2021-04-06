@@ -12,9 +12,9 @@ class UserModel extends Model
     return FALSE;
   }
 
-  public function getUserData(string $email) {
+  public function getUserData(string $username) {
     return $this->db->table('users')
-      ->where('email', $email)
+      ->where('username', $username)
       ->get()->getRowArray();
   }
 
