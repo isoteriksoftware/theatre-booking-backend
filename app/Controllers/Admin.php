@@ -105,38 +105,12 @@ class Admin extends BaseController
 			$admin = $this->authenticateSession();
 
       if ($admin) {
-				if ($this->request->getGet('size') && is_numeric($this->request->getGet('size')))
-					$size = $this->request->getGet('size');
-				else 
-					$size = null;
-
-				if ($this->request->getGet('offset') && is_numeric($this->request->getGet('offset')))
-					$offset = $this->request->getGet('offset');
-				else
-					$offset = 0;
-
-				if ($this->request->getGet('search') && trim($this->request->getGet('search')) != '')
-					$search = $this->request->getGet('search');
-				else 
-					$search = null;
-
-				if ($this->request->getGet('status') && trim($this->request->getGet('status')) != '')
-					$status = \strtoupper($this->request->getGet('status'));
-				else 
-					$status = null;
-
-				$bookings = $this->model->getBookings($size, $offset, $search, $status);
+				$bookings = $this->model->getBookings();
 				if ($bookings) {
-					$data = [];
-					foreach($bookings as $booking) {
-						$booking['sender_avatar_url'] = $this->getAbsolutePublicFileUrl(getenv('USERS_AVATAR_DIRECTORY') . $booking['sender_avatar']);
-						$data[] = $booking;
-					}
-
-					return $this->respond($data);
+					return $this->respond($bookings);
 				}
 				else
-					return $this->failNotFound('No booking matched your queries.');
+					return $this->failNotFound('No booking yet.');
       }
       else {
 				return $this->failUnauthorized('Authentication failed!');
@@ -147,43 +121,7 @@ class Admin extends BaseController
     }
 	}
 
-	public function getBooking(int $booking_id) {
-		try {
-      // Set the headers
-			$this->setDefaultHeaders();
-			
-			$admin = $this->authenticateSession();
-
-      if ($admin) {
-				// Validation rules
-				$validationRules = [
-					'booking_id' => 'trim|required|is_not_unique[bookings.id]',
-				];
-
-				$data['booking_id'] = $booking_id;
-
-				// Validate the data
-				$this->validation->setRules($validationRules);
-				if ($this->validation->run($data)) {
-					// Get the booking
-					$booking = $this->model->getBookingData($booking_id);
-
-					return $this->respond($booking);
-				}
-				else {
-					return $this->failValidationError($this->arrayToString($this->validation->getErrors()));
-				}
-      }
-      else {
-				return $this->failUnauthorized('Authentication failed!');
-			}
-    } catch(\Throwable $th) {
-			$this->logException($th);
-			return $this->failServerError();
-    }
-	}
-
-	public function addCoupon() {
+	public function addShow() {
 		try {
       // Set the headers
 			$this->setDefaultHeaders();
@@ -198,29 +136,81 @@ class Admin extends BaseController
 
 				// Validation rules
 				$validationRules = [
-					'discount'    => 'trim|required|decimal|greater_than[0]',
-					'code'        => 'trim|required|alpha_numeric_space|max_length[30]|is_unique[coupons.code]',
-					'expiry_date' => 'trim|required|valid_date[Y-m-d H:i:s]',
+					'name'        => 'trim|required|alpha_numeric_space|max_length[300]|is_unique[shows.name]',
+					'description' => 'trim|required|alpha_numeric_punct|max_length[1000]',
+					'image'       => 'trim|required',
+					'start_date'  => 'trim|required|valid_date[Y-m-d H:i:s]',
+					'end_date'    => 'trim|required|valid_date[Y-m-d H:i:s]',
 				];
 
 				// Validate the data
 				$this->validation->setRules($validationRules);
 				if ($this->validation->run($data)) {
-					// Create the entries array
+					// Cend_datereate the entries array
 					$entries = [
-						'discount'      => $data['discount'] / 100,
-						'code'          => $data['code'],
-						'expiry_date'   => $data['expiry_date'],
+						'name'        => $data['name'],
+						'description' => $data['description'],
+						'image'       => $data['image'],
+						'start_date'       => $data['start_date'],
+						'end_date'       => $data['end_date'],
 					];
 
-					if ($this->model->addCoupon($entries))
-						return $this->respondCreated('Coupon added.');
+					if ($this->model->addShow($entries))
+						return $this->respondCreated('Show added.');
 					else
-						return $this->fail('Failed to add coupon.');
+						return $this->fail('Failed to add show.');
 				}
 				else {
 					return $this->failValidationError($this->arrayToString($this->validation->getErrors()));
 				}
+      }
+      else {
+				return $this->failUnauthorized('Authentication failed!');
+			}
+    } catch(\Throwable $th) {
+			$this->logException($th);
+			return $this->failServerError();
+    }
+	}
+
+	public function getShows() {
+		try {
+      // Set the headers
+			$this->setDefaultHeaders();
+			
+			$admin = $this->authenticateSession();
+
+      if ($admin) {
+				$shows = $this->model->getShows();
+				if ($shows) {
+					return $this->respond($shows);
+				}
+				else
+					return $this->failNotFound('No shows yet.');
+      }
+      else {
+				return $this->failUnauthorized('Authentication failed!');
+			}
+    } catch(\Throwable $th) {
+			$this->logException($th);
+			return $this->failServerError();
+    }
+	}
+
+	public function getTickets() {
+		try {
+      // Set the headers
+			$this->setDefaultHeaders();
+			
+			$admin = $this->authenticateSession();
+
+      if ($admin) {
+				$tickets = $this->model->getTickets();
+				if ($tickets) {
+					return $this->respond($tickets);
+				}
+				else
+					return $this->failNotFound('No tickets yet.');
       }
       else {
 				return $this->failUnauthorized('Authentication failed!');

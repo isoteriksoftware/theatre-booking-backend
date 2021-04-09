@@ -22,7 +22,14 @@ $routes->setAutoRoute(true);
 $routes->get('/', 'Home::index');
 $routes->post('user', 'User::createUser');
 $routes->post('user/session', 'User::createSession');
+$routes->delete('user/session', 'User::clearSession');
+$routes->post('user/booking', 'User::addBooking');
 $routes->post('admin/session', 'Admin::createSession');
+$routes->delete('admin/session', 'Admin::clearSession');
+$routes->post('admin/show', 'Admin::addShow');
+$routes->get('admin/show', 'Admin::getShows');
+$routes->get('admin/booking', 'Admin::getBookings');
+$routes->get('admin/tickets', 'Admin::getTickets');
 
 if (file_exists(APPPATH . 'Config/' . ENVIRONMENT . '/Routes.php'))
 {
