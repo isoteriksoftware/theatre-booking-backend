@@ -4,9 +4,9 @@ use CodeIgniter\Model;
 
 class AdminModel extends Model
 {
-  public function getAdminData(string $email) {
+  public function getAdminData(string $username) {
     return $this->db->table('admins')
-      ->where('email', $email)
+      ->where('username', $username)
       ->get()->getRowArray();
   }
 
