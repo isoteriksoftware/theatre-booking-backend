@@ -19,6 +19,8 @@ $routes->setTranslateURIDashes(false);
 $routes->set404Override();
 $routes->setAutoRoute(true);
 
+$routes->options('(:any)', 'BaseController::options');
+
 $routes->get('/', 'Home::index');
 $routes->post('user', 'User::createUser');
 $routes->post('user/session', 'User::createSession');
