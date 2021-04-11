@@ -130,29 +130,50 @@ class Admin extends BaseController
 
       if ($admin) {
 				// Retrieve the sent data
-				$data = $this->request->getJSON(true);
+				$data = $this->request->getPost();
 				if (!$data)
 					return $this->failNotFound('No valid data was provided!');
+
+				$allowed_file_types = 'png,jpeg,jpg';
+				$max_file_size      = 2048;
 
 				// Validation rules
 				$validationRules = [
 					'name'        => 'trim|required|alpha_numeric_space|max_length[300]|is_unique[shows.name]',
 					'description' => 'trim|required|alpha_numeric_punct|max_length[1000]',
-					'image'       => 'trim|required',
-					'start_date'  => 'trim|required|valid_date[Y-m-d H:i:s]',
-					'end_date'    => 'trim|required|valid_date[Y-m-d H:i:s]',
+					'image'       => "uploaded[image]|max_size[image,{$max_file_size}]|ext_in[image,{$allowed_file_types}]",
+					'start_date'  => 'trim|required|valid_date[Y-m-d]',
+					'end_date'    => 'trim|required|valid_date[Y-m-d]',
 				];
 
 				// Validate the data
 				$this->validation->setRules($validationRules);
 				if ($this->validation->run($data)) {
-					// Cend_datereate the entries array
+					// First upload the image file
+
+					// Get any uploaded avatar file
+					$image = $this->request->getFile('image');
+
+					helper('text');
+
+					$dir = 'files/shows/';
+
+					// Upload the new avatar
+					$image_filename = \random_string('alnum', 30) . $admin['id'] . '.' . $image->getExtension();
+					$entries['image'] = $image_filename;
+
+					if (! $image->move($dir, $image_filename)) {
+						// Failed to upload image
+						return $this->fail('Could not upload the image.');
+					}
+
+					// Create the entries array
 					$entries = [
 						'name'        => $data['name'],
 						'description' => $data['description'],
-						'image'       => $data['image'],
-						'start_date'       => $data['start_date'],
-						'end_date'       => $data['end_date'],
+						'image'       => $image_filename,
+						'start_date'  => $data['start_date'],
+						'end_date'    => $data['end_date'],
 					];
 
 					if ($this->model->addShow($entries))
@@ -183,7 +204,13 @@ class Admin extends BaseController
       if ($admin) {
 				$shows = $this->model->getShows();
 				if ($shows) {
-					return $this->respond($shows);
+					$data = [];
+					foreach($shows as $show) {
+						$show['image_url'] = $this->getAbsolutePublicFileUrl('files/shows/' . $show['image']);
+						$data[] = $show;
+					}
+
+					return $this->respond($data);
 				}
 				else
 					return $this->failNotFound('No shows yet.');
@@ -191,6 +218,29 @@ class Admin extends BaseController
       else {
 				return $this->failUnauthorized('Authentication failed!');
 			}
+    } catch(\Throwable $th) {
+			$this->logException($th);
+			return $this->failServerError();
+    }
+	}
+
+	public function getPublicShows() {
+		try {
+      // Set the headers
+			$this->setDefaultHeaders();
+			
+			$shows = $this->model->getShows();
+			if ($shows) {
+				$data = [];
+				foreach($shows as $show) {
+					$show['image_url'] = $this->getAbsolutePublicFileUrl('files/shows/' . $show['image']);
+					$data[] = $show;
+				}
+
+				return $this->respond($data);
+			}
+			else
+				return $this->failNotFound('No shows yet.');
     } catch(\Throwable $th) {
 			$this->logException($th);
 			return $this->failServerError();

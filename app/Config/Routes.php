@@ -22,6 +22,8 @@ $routes->setAutoRoute(true);
 $routes->options('(:any)', 'BaseController::options');
 
 $routes->get('/', 'Home::index');
+$routes->get('shows', 'Admin::getPublicShows');
+
 $routes->post('user', 'User::createUser');
 $routes->post('user/session', 'User::createSession');
 $routes->delete('user/session', 'User::clearSession');

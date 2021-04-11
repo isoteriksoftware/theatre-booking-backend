@@ -47,6 +47,7 @@ class AdminModel extends Model
 
   public function getShows() {
     return $this->db->table('shows')
+      ->orderBy('date_added', 'DESC')
       ->get()->getResultArray();
   }
 

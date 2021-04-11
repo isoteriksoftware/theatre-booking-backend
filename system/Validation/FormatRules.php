@@ -75,7 +75,7 @@ class FormatRules
 	public function alpha_numeric_punct($str)
 	{
 		// @see https://regex101.com/r/6N8dDY/1
-		return (bool) preg_match('/\A[A-Z0-9 ~!#$%\&\*\-_+=|:.]+\z/i', $str);
+		return (bool) preg_match('/\A[A-Z0-9 ~!#$%\&\*\-_+=|:.,\'()]+\z/i', $str);
 	}
 
 	/**
