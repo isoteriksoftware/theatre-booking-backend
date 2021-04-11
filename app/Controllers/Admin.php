@@ -1,5 +1,7 @@
 <?php namespace App\Controllers;
 
+use CodeIgniter\I18n\Time;
+
 class Admin extends BaseController
 {
 	protected $session_name = 'admin_session_data';
@@ -149,6 +151,12 @@ class Admin extends BaseController
 				// Validate the data
 				$this->validation->setRules($validationRules);
 				if ($this->validation->run($data)) {
+					// Validate the duration
+					$start = new Time($data['start_date']); 
+					$end = new Time($data['end_date']);
+					if ($start->equals($end) || $start->isAfter($end) || $start->isBefore(new Time()))
+						return $this->failValidationError('The duration is invalid. Please choose valid dates.');
+
 					// First upload the image file
 
 					// Get any uploaded avatar file
