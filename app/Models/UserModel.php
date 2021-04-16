@@ -39,4 +39,11 @@ class UserModel extends Model
 
     return FALSE;
   }
+
+  public function getTotalTickets($show_id) {
+    return $this->db->table('tickets')
+      ->select('COUNT(id) AS total')
+      ->where('show_id', $show_id)
+      ->get()->getRowArray()['total'];
+  }
 }

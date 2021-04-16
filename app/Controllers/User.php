@@ -156,20 +156,23 @@ class User extends BaseController
 
 				// Validation rules
 				$validationRules = [
-					'location' => 'trim|required|alpha_numeric_punct|max_length[500]',
 					'show_id'  => 'trim|required|numeric|is_not_unique[shows.id]',
 				];
 
 				// Validate the data
 				$this->validation->setRules($validationRules);
 				if ($this->validation->run($data)) {
+					// Make sure we don't have upto 30 tickets sold for this show
+					if ($this->model->getTotalTickets($data['show_id']) >= 30)
+						return $this->failResourceExists('This show cannot booked anymore');
+
 					$ticket_id = $this->model->addTicket(['show_id' => $data['show_id']]);
 					if (!$ticket_id)
 						return $this->fail('Failed to add show.');
 
 					// Cend_datereate the entries array
 					$entries = [
-						'location'  => $data['location'],
+						'location'  => '',
 						'user_id'   => $user['id'],
 						'ticket_id' => $ticket_id,
 					];

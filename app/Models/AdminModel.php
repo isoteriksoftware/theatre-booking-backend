@@ -47,7 +47,10 @@ class AdminModel extends Model
 
   public function getShows() {
     return $this->db->table('shows')
-      ->orderBy('date_added', 'DESC')
+      ->select('shows.*, COUNT(tickets.id) AS tickets')
+      ->orderBy('shows.date_added', 'DESC')
+      ->groupBy('shows.id')
+      ->join('tickets', 'tickets.show_id = shows.id', 'left')
       ->get()->getResultArray();
   }
 
@@ -66,5 +69,12 @@ class AdminModel extends Model
     return $this->db->table('shows')
       ->where('id', $id)
       ->get()->getRowArray();
+  }
+
+  public function getTotalTickets($show_id) {
+    return $this->db->table('tickets')
+      ->select('COUNT(id) AS total')
+      ->where('show_id', $show_id)
+      ->get()->getRowArray()['total'];
   }
 }
